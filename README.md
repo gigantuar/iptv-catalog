@@ -6,7 +6,7 @@ There is a companion script `iptv_search.py` which allows searching the local da
 
 ## Goals
 
-The primary motiviation behind this script was to store stream data in an easy to access format while also discovering metadata such as the resolution. The script works well for the purpose it was designed for. The script is intentionally not split into several modules as I prefered a single file for my use case, this could change in the future.
+The primary motivation behind this script was to store stream data in an easy to access format while also discovering metadata such as the resolution. The script works well for the purpose it was designed for. The script is intentionally not split into several modules as I preferred a single file for my use case, this could change in the future.
 
 This is my first comprehensive Python script and there is room for improvement.
 

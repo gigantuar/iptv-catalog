@@ -964,7 +964,7 @@ def process_ffprobe(settings, conn):
         logging.info("No streams require ffprobe processing.")
         return
 
-    # Run ffprobe with a dedicated database connnection for threading
+    # Run ffprobe with a dedicated database connection for threading
     def run_ffprobe_thread(stream_id):
         global db_filename
         conn = sqlite3.connect(db_filename)
@@ -979,7 +979,7 @@ def process_ffprobe(settings, conn):
     print(f"Initiating ffprobe with {settings['connections']} connections.")
     logging.info(f"Using User-Agent: {settings['user_agent']}")
     with ThreadPoolExecutor(max_workers=settings["connections"]) as executor:
-        # Use tdqm for progess bar tracking.
+        # Use tdqm for progress bar tracking.
         # Fixed width to 80 columns to allow resizing the console.
         list(
             tqdm(
@@ -1131,7 +1131,7 @@ def print_stats(conn):
     # Print the results
     print(f"Total Categories: {total_categories}")
     print(f"Total Channels: {total_streams}")
-    print(f"Channels Sucessfully Probed: {streams_with_json}")
+    print(f"Channels Successfully Probed: {streams_with_json}")
     print(f"Channels Missing Data: {streams_failed}")
 
 
