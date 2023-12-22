@@ -51,9 +51,6 @@ def fetch_data(args, db_filenames, search_table):
 
         results = retrieve_live_ffprobe(conn, name=args.channel_name, order=sort)
 
-        if not results:
-            return None
-
         streams = [Stream(data) for data in results]
 
         base_filename = os.path.basename(db_file)
@@ -126,7 +123,8 @@ def main():
     ]
 
     full_table = fetch_data(args, db_filenames, search_table)
-    if full_table:
+
+    if len(full_table._rows) > 0:
         print(full_table)
     else:
         print("No matches found.")
