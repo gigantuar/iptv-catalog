@@ -1,0 +1,47 @@
+[portalname1]
+# Mandatory
+portal_url = 
+username = 
+password = 
+# Optional
+categories = 
+connections = 
+disable_ffprobe = 
+force_refresh = 
+offline =
+user_agent = 
+
+[portalname2]
+portal_url = 
+username = 
+password = 
+
+# Add more portals similarly...
+
+# Mandatory Fields:
+# [portal_name]     =   Name to reference portal by. This is case sensitive.
+# portal_url        =   Portal URL including protocol and port. Example: http://example.com:1234
+# username          =   username
+# password          =   password
+
+# Optional Fields:
+# categories        =   Comma separated list of category_ids to restrict ffprobe
+#                       processing. Example: 900,901,902 or 900, 901, 902
+#
+# connections       =   # - Number of service connections to utilize for ffprobe.
+#                       If you do not know how many connections you are subscribed
+#                       to use leave this field blank and use the --portal-info flag
+#                       which will include max_connections.
+#
+# disable_ffprobe   =   yes/no, true/false - Disable ffprobe probing which consumes a service connection.
+#
+# force_refresh     =   yes/no, true/false - Force refreshing of categories and streams every time (default 24 hours)
+#
+# offline           =   yes/no, true/false - Set the portal in offline mode so that queries are
+#                       never attempted against the portal. Useful for old
+#                       services that are in the database.
+#
+# simple            =   yes/no, true/false - Always use the simple output for -ecli/--export-cli
+#
+# user_agent        =   Override the user-agent used to fetch from the portal and process
+#                       streams with ffprobe.

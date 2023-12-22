@@ -1,0 +1,11 @@
+.env
+.venv
+env/
+venv/
+ENV/
+.python-version
+__pycache__/
+
+*.db
+*.csv
+*.ini
