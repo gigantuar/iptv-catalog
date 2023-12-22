@@ -60,7 +60,7 @@ def fetch_data(args, db_filenames, search_table):
 
         for stream in streams:
             stream_data = stream.get_display_data(search=True)
-            if stream_data[4] != "":
+            if stream_data[4] != "" or args.include_failed:
                 row_data = [base_filename, *stream_data]
                 search_table.add_row(row_data)
 
@@ -87,6 +87,12 @@ def main():
         "--all",
         action="store_true",
         help="Search through all *.db files in the script folder.",
+    )
+    parser.add_argument(
+        "-if",
+        "--include-failed",
+        action="store_true",
+        help="Include channels which failed ffprobe processing in results.",
     )
 
     args = parser.parse_args()
