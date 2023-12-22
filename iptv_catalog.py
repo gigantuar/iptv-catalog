@@ -51,7 +51,7 @@ import requests
 import prettytable
 from tqdm import tqdm
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 # Global variables
 db_filename = None
@@ -257,6 +257,7 @@ def merge_settings(cli_args, config, portal_name):
         "force_probe",
         "no_probe",
         "offline",
+        "quiet",
         "simple",
     ]
     integer_settings = ["delay", "connections"]
@@ -551,7 +552,7 @@ def retrieve_live_ffprobe(conn, categories=None, failed=False, name=False, order
     return execute_sql(conn, sql, fetch=True)
 
 
-def store_categories(categories, conn):
+def store_categories(categories, conn, quiet):
     """Sync categories with the database"""
 
     def _compare_fields_category(old_data, new_data):
@@ -610,11 +611,12 @@ def store_categories(categories, conn):
                 continue
         else:
             category_name = new_data[0]
-            print(
-                "Inserting new category:\n"
-                f"\t- category_id: {category_id}\n"
-                f"\t- category_name: {category_name}\n"
-            )
+            if not quiet:
+                print(
+                    "Inserting new category:\n"
+                    f"\t- category_id: {category_id}\n"
+                    f"\t- category_name: {category_name}\n"
+                )
             execute_sql(
                 conn,
                 sql_insert,
@@ -635,7 +637,7 @@ def store_categories(categories, conn):
         execute_sql(conn, sql_delete, (category_id,))
 
 
-def store_streams(streams_list, conn):
+def store_streams(streams_list, conn, quiet):
     """Sync streams with the database"""
 
     def _compare_fields_stream(old_data, new_data, field_names):
@@ -714,11 +716,12 @@ def store_streams(streams_list, conn):
             data.append(datetime.now())
             data = tuple(data)
 
-            print(
-                "Inserting new stream:\n"
-                f"\t- stream_id: {stream_id}\n"
-                f"\t- name: {stream.get('name')}\n"
-            )
+            if not quiet:
+                print(
+                    "Inserting new stream:\n"
+                    f"\t- stream_id: {stream_id}\n"
+                    f"\t- name: {stream.get('name')}\n"
+                )
             execute_sql(conn, sql_delete_ffprobe, (stream_id,))
             execute_sql(conn, sql_insert, data)
 
@@ -864,7 +867,7 @@ def process_categories(settings, conn):
     categories = fetch_categories(settings)
     if categories:
         logging.info("Storing live stream categories in database...")
-        store_categories(categories, conn)
+        store_categories(categories, conn, settings["quiet"])
         store_refresh("live_categories", conn)
 
 
@@ -896,7 +899,7 @@ def process_streams(settings, conn):
     streams = fetch_streams(settings)
     if streams:
         logging.info("Storing live streams in database...")
-        store_streams(streams, conn)
+        store_streams(streams, conn, settings["quiet"])
         store_refresh("live_streams", conn)
 
 
@@ -1307,6 +1310,13 @@ def setup_arg_parser():
         help="""Export stream data to CSV. Specify desired filename (-ecsv portal.csv)
                 or it will be derived from the portal URL for you.""",
         metavar="FILENAME.csv",
+    )
+    info.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="""Suppresses CLI output of categories/streams being added/removed/modified
+                during sync. Significantly speeds up the initial sync."""
     )
     info.add_argument(
         "-s",
