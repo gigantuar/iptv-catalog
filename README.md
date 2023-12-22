@@ -96,6 +96,7 @@ python iptv-catalog.py [portal_url] [username] [password]
 - `-pl, --portal-list`          Print the list of portals defined in `portals.ini`
 - `-pi, --portal-info`          Print the user/server info for the portal.
 - `-pc, --print-config`         Print the configuration as interpreted from `portals.ini` and/or CLI overrides
+- `-q, --quiet`                 Suppresses CLI output of categories/streams being added/removed/modified during sync. Significantly speeds up initial sync.
 - `-cap, --categories-print`    Print all categories with IDs and exit
 - `-ca, --categories`           Filter specific categories by IDs
 - `-con, --connections`         Number of connections for parallel processing (default: 1)
