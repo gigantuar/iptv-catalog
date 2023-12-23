@@ -5,6 +5,7 @@ username =
 password = 
 # Optional
 categories = 
+categories_exclude = 
 connections = 
 disable_ffprobe = 
 force_refresh = 
@@ -25,23 +26,26 @@ password =
 # password          =   password
 
 # Optional Fields:
-# categories        =   Comma separated list of category_ids to restrict ffprobe
-#                       processing. Example: 900,901,902 or 900, 901, 902
+# categories          =   Comma separated list of category_ids to restrict ffprobe
+#                         processing. Example: 900,901,902 or 900, 901, 902
 #
-# connections       =   # - Number of service connections to utilize for ffprobe.
-#                       If you do not know how many connections you are subscribed
-#                       to use leave this field blank and use the --portal-info flag
-#                       which will include max_connections.
+# categories_exclude  =   Comma separated list of category_ids to exclude from ffprobe
+#                         processing.
 #
-# disable_ffprobe   =   yes/no, true/false - Disable ffprobe probing which consumes a service connection.
+# connections         =   # - Number of service connections to utilize for ffprobe.
+#                         If you do not know how many connections you are subscribed
+#                         to use leave this field blank and use the --portal-info flag
+#                         which will include max_connections.
 #
-# force_refresh     =   yes/no, true/false - Force refreshing of categories and streams every time (default 24 hours)
+# disable_ffprobe     =   yes/no, true/false - Disable ffprobe probing which consumes a service connection.
 #
-# offline           =   yes/no, true/false - Set the portal in offline mode so that queries are
-#                       never attempted against the portal. Useful for old
-#                       services that are in the database.
+# force_refresh       =   yes/no, true/false - Force refreshing of categories and streams every time (default 24 hours)
 #
-# simple            =   yes/no, true/false - Always use the simple output for -ecli/--export-cli
+# offline             =   yes/no, true/false - Set the portal in offline mode so that queries are
+#                         never attempted against the portal. Useful for old
+#                         services that are in the database.
 #
-# user_agent        =   Override the user-agent used to fetch from the portal and process
-#                       streams with ffprobe.
+# simple              =   yes/no, true/false - Always use the simple output for -ecli/--export-cli
+#
+# user_agent          =   Override the user-agent used to fetch from the portal and process
+#                         streams with ffprobe.
