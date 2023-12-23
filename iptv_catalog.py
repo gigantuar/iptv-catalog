@@ -42,7 +42,7 @@ import subprocess
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timezone
 from threading import Event
 from urllib.parse import urlparse
 
@@ -1036,7 +1036,9 @@ def print_portal_info(portal_info):
     user_info = portal_info.get("user_info", {})
     for key, value in user_info.items():
         if key in ["exp_date", "created_at"]:
-            value = datetime.utcfromtimestamp(int(value)).strftime("%Y-%m-%d %H:%M:%S")
+            value = datetime.fromtimestamp(int(value), timezone.utc).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         user_info_table.add_row([key, value if value not in (None, "") else ""])
 
     server_info = portal_info.get("server_info", {})
@@ -1316,7 +1318,7 @@ def setup_arg_parser():
         "--quiet",
         action="store_true",
         help="""Suppresses CLI output of categories/streams being added/removed/modified
-                during sync. Significantly speeds up the initial sync."""
+                during sync. Significantly speeds up the initial sync.""",
     )
     info.add_argument(
         "-s",
