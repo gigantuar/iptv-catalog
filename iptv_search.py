@@ -153,24 +153,24 @@ def main():
         )
         sys.exit(1)
 
-    if args.channel_name:
-        perform_search(args)
-    else:
-        # Loop for continuous search
-        while True:
-            args.channel_name = input(
-                "Enter terms to search for in the channel name (split by spaces): "
-            )
+    try:
+        if args.channel_name:
             perform_search(args)
+        else:
+            # Loop for continuous search
+            while True:
+                args.channel_name = input(
+                    "Enter terms to search for in the channel name (split by spaces): "
+                )
+                perform_search(args)
 
-            try:
                 cont = input("Search again? (y/n): ").lower()
                 if cont != "y":
                     break
                 args.channel_name = None  # Reset channel name for new search
-            except KeyboardInterrupt:
-                print("\nExiting program.")
-                break
+    except KeyboardInterrupt:
+        print("\nExiting program.")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
