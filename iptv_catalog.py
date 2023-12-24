@@ -525,7 +525,7 @@ def retrieve_refresh(synctable, conn):
     return result[0][0] if result else None
 
 
-def retrieve_live_ffprobe(conn, categories=None, failed=False, name=False, order=False):
+def retrieve_live_ffprobe(conn, categories=None, failed=False, names=None, order=False):
     """Retrieve live_streams ffprobe data from the database."""
     sql = """
         SELECT c.category_id, c.category_name,
@@ -541,8 +541,9 @@ def retrieve_live_ffprobe(conn, categories=None, failed=False, name=False, order
         sql += " WHERE f.raw_json is NULL"
     elif categories:
         sql += f" WHERE s.category_id IN ({categories})"
-    elif name:
-        sql += f" WHERE s.name LIKE '%{name}%'"
+    elif names:
+        name_search = [f"s.name LIKE '%{name}%'" for name in names]
+        sql += " WHERE " + " AND ".join(name_search)
 
     if order:
         sql += f" {order}"

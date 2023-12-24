@@ -43,13 +43,15 @@ from iptv_catalog import Stream
 
 
 def fetch_data(args, db_filenames, search_table):
+    # Split the channel_name into a list of names
+    search_terms = args.channel_name.split()
     for db_file in db_filenames:
         conn = setup_database(db_file)
 
         sort = """ORDER BY f.height DESC,
                           s.name;"""
 
-        results = retrieve_live_ffprobe(conn, name=args.channel_name, order=sort)
+        results = retrieve_live_ffprobe(conn, names=search_terms, order=sort)
 
         streams = [Stream(data) for data in results]
 
@@ -69,39 +71,7 @@ def fetch_data(args, db_filenames, search_table):
     return search_table
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Search IPTV Cataloger databases for channel details."
-    )
-    parser.add_argument("channel_name", help="Text to search for in the channel names")
-    parser.add_argument(
-        "-p",
-        "--portal",
-        help="Specify a portal name to search from the portals.ini config.",
-    )
-    parser.add_argument(
-        "-d", "--db", help="Specify the local SQLite database filename directly."
-    )
-    parser.add_argument(
-        "-a",
-        "--all",
-        action="store_true",
-        help="Search through all *.db files in the script folder.",
-    )
-    parser.add_argument(
-        "-if",
-        "--include-failed",
-        action="store_true",
-        help="Include channels which failed ffprobe processing in results.",
-    )
-
-    args = parser.parse_args()
-
-    # Ensure that one primary argument is provided
-    if not (args.portal or args.db or args.all):
-        parser.error("One of --portal, --db, or --all must be provided.")
-        sys.exit(1)
-
+def perform_search(args):
     config = load_config(args.portal) if args.portal else None
     portal_name = args.portal if args.portal else None
     settings = merge_settings(args, config, portal_name)
@@ -125,7 +95,13 @@ def main():
 
     search_table = prettytable.PrettyTable(align="l")
     search_table.field_names = [
-        "Database", "Category", "Ch Num", "Channel", "Catchup", "Standard", "FPS"
+        "Database",
+        "Category",
+        "Ch Num",
+        "Channel",
+        "Catchup",
+        "Standard",
+        "FPS",
     ]
 
     full_table = fetch_data(args, db_filenames, search_table)
@@ -134,6 +110,67 @@ def main():
         print(full_table)
     else:
         print("No matches found.")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Search IPTV Cataloger databases for channel details."
+    )
+    parser.add_argument(
+        "-c",
+        "--channel-name",
+        default=None,
+        help="Text to search for in the channel names, split by spaces.",
+    )
+    parser.add_argument(
+        "-p",
+        "--portal",
+        help="Specify a portal name to search from the portals.ini config.",
+    )
+    parser.add_argument(
+        "-d", "--db", help="Specify the local SQLite database filename directly."
+    )
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Search through all *.db files in the script folder.",
+    )
+    parser.add_argument(
+        "-if",
+        "--include-failed",
+        action="store_true",
+        help="Include channels which failed ffprobe processing in results.",
+    )
+
+    args = parser.parse_args()
+
+    # Check if any database selection argument is provided
+    if not any([args.portal, args.db, args.all]):
+        print(
+            "Error: No database specified.\n"
+            "Please provide a database using --portal, --db, or --all."
+        )
+        sys.exit(1)
+
+    if args.channel_name:
+        perform_search(args)
+    else:
+        # Loop for continuous search
+        while True:
+            args.channel_name = input(
+                "Enter terms to search for in the channel name (split by spaces): "
+            )
+            perform_search(args)
+
+            try:
+                cont = input("Search again? (y/n): ").lower()
+                if cont != "y":
+                    break
+                args.channel_name = None  # Reset channel name for new search
+            except KeyboardInterrupt:
+                print("\nExiting program.")
+                break
 
 
 if __name__ == "__main__":
