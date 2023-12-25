@@ -221,6 +221,9 @@ def check_ffprobe():
 
 def get_filename(portal_url, file_type):
     """Return the database or CSV filename derived from the portal name."""
+    if not portal_url:
+        logging.critical("Invalid Portal URL.")
+        sys.exit(1)
     parsed_url = urlparse(portal_url)
     portal_name = (
         f"{parsed_url.hostname}-{parsed_url.port}"
@@ -323,6 +326,28 @@ def get_user_agent(user_agent_choice):
         "tivimax": "TiviMaxMobilePremium/30809.2.1 CFNetwork/1485 Darwin/23.1.0",
     }
     return user_agents.get(user_agent_choice, None)
+
+
+def test_api(settings):
+    """Test the Xtream compatible API."""
+    headers = {"User-Agent": settings["user_agent"]} if settings["user_agent"] else {}
+    params = {
+        "username": settings["username"],
+        "password": settings["password"],
+    }
+    try:
+        response = requests.get(
+            f"{settings['portal_url']}/player_api.php",
+            params=params,
+            headers=headers,
+        )
+        if response.ok:
+            return True
+        else:
+            return response
+    except requests.RequestException as e:
+        logging.critical(f"Request failed: {e}")
+        sys.exit(1)
 
 
 def query_api(settings, action, portal_info=False):
@@ -1445,6 +1470,17 @@ def main():
     if not settings and config:
         logging.error("Portal configuration not found or missing required arguments.")
         sys.exit(1)
+
+    # Test connection first
+    if settings["offline"] is False:
+        portal_test = test_api(settings)
+        if portal_test is not True:
+            logging.critical(
+                f"Portal connection test failed. Error code: {portal_test.status_code}"
+            )
+            sys.exit(1)
+    else:
+        logging.info("Portal in offline mode, skipping connection test.")
 
     # Setup database
     global db_filename
