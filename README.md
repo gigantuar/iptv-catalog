@@ -161,9 +161,12 @@ password = pass
 `iptv_search.py` is available to quickly search the local database created by `iptv_catalog.py`. `iptv_search.py` imports functions from `iptv_catalog.py` so you need both scripts in order to search.
 
 ### Usage
-`iptv_search.py [--portal PORTAL] [--db DB] [--all] channel_name`
+`iptv_search.py [-p PORTAL] [-d DB] [-a] [-if] [-c CHANNEL_NAME]`
 
 - `-p, --portal PORTAL`   Specify a portal name from portals.ini to select the database.
 - `-d, --db DB`           Specify the local SQLite database filename directly.
 - `-a, --all`             Search through all *.db files in the script folder.
-- `channel_name`          Text to search for in the channel names
+- `-c, --channel-name`    Search for string "or multiple strings" in channel name.
+- `-if, --include-failed` Include channels which failed ffprobe processing in results.
+
+The -c/--channel-name flag is optional and if executed without it you will be prompted for search terms. You will also have the opportunity to perform multiple searches before exiting the script.
