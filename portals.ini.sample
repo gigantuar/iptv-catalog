@@ -7,7 +7,7 @@ password =
 categories = 
 categories_exclude = 
 connections = 
-disable_ffprobe = 
+no_probe = 
 force_refresh = 
 offline =
 user_agent = 
@@ -37,7 +37,7 @@ password =
 #                         to use leave this field blank and use the --portal-info flag
 #                         which will include max_connections.
 #
-# disable_ffprobe     =   yes/no, true/false - Disable ffprobe probing which consumes a service connection.
+# no_probe            =   yes/no, true/false - Disable ffprobe probing which consumes a service connection.
 #
 # force_refresh       =   yes/no, true/false - Force refreshing of categories and streams every time (default 24 hours)
 #
