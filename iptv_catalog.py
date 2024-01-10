@@ -51,7 +51,7 @@ import requests
 import prettytable
 from tqdm import tqdm
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 # Global variables
 db_filename = None
