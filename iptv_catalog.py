@@ -279,7 +279,7 @@ def merge_settings(cli_args, config, portal_name):
 
         if setting in boolean_settings:
             # For 'store_true' arguments, first check CLI, then config
-            if cli_value is not None:
+            if cli_value is not False:
                 settings[setting] = cli_value
             elif config and config.has_option(portal_name, setting):
                 settings[setting] = config.getboolean(
@@ -766,7 +766,7 @@ def store_streams(streams_list, conn, quiet):
         execute_sql(conn, sql_delete_ffprobe, (stream_id,))
 
 
-def store_ffprobe_results(stream_id, ffprobe_data, conn):
+def store_ffprobe_results(stream_id, ffprobe_data, conn, no_probe=False):
     """Store ffprobe data in the database, including handling ffprobe failures."""
     # Check if ffprobe_data is valid JSON; if not, set to a compact format or None
     compact_ffprobe_data = None
@@ -785,6 +785,10 @@ def store_ffprobe_results(stream_id, ffprobe_data, conn):
             stream_info = json.loads(compact_ffprobe_data).get("streams", [{}])[0]
         except (KeyError, IndexError, json.JSONDecodeError):
             stream_info = {}
+
+    # Populate raw_json with "no_probe" if probing is disabled
+    if no_probe is True:
+        compact_ffprobe_data = "no_probe"
 
     keys = (
         "codec_name",
@@ -968,6 +972,17 @@ def process_ffprobe(settings, conn):
         )
     ]
 
+    # Append streams which previously had probing skipped
+    skipped_stream_ids = execute_sql(
+        conn,
+        "SELECT stream_id FROM live_ffprobe WHERE raw_json LIKE 'no_probe'",
+        fetch=True,
+    )
+    # Convert tuple to list
+    skipped_stream_ids = [stream_id[0] for stream_id in skipped_stream_ids]
+    # Add skipped stream_ids existing list
+    stream_ids_to_process.extend(skipped_stream_ids)
+
     # If probe_failed is True, append failed stream_ids for processing
     if settings["probe_failed"]:
         # Fetch stream_ids missing JSON data
@@ -999,14 +1014,20 @@ def process_ffprobe(settings, conn):
         conn = sqlite3.connect(db_filename)
         try:
             logging.info(f"Running ffprobe for stream_id: {stream_id}")
-            ffprobe_data = run_ffprobe(settings, stream_id)
-            store_ffprobe_results(stream_id, ffprobe_data, conn)
+            if not settings["no_probe"]:
+                ffprobe_data = run_ffprobe(settings, stream_id)
+            else:
+                ffprobe_data = None
+            store_ffprobe_results(stream_id, ffprobe_data, conn, settings["no_probe"])
         finally:
             conn.close()
 
     # Initiate ffprobe threads based on the number of connections defined by the user
-    print(f"Initiating ffprobe with {settings['connections']} connections.")
-    logging.info(f"Using User-Agent: {settings['user_agent']}")
+    if not settings["no_probe"]:
+        print(f"Initiating ffprobe with {settings['connections']} connections.")
+        logging.info(f"Using User-Agent: {settings['user_agent']}")
+    else:
+        print("Probing with ffprobe is disabled. Populating table with empty data.")
     with ThreadPoolExecutor(max_workers=settings["connections"]) as executor:
         # Use tdqm for progress bar tracking.
         # Fixed width to 80 columns to allow resizing the console.
@@ -1030,12 +1051,7 @@ def process_portal(settings, conn):
     if not settings["offline"]:
         process_categories(settings, conn)
         process_streams(settings, conn)
-
-        # Initiate ffprobe process if not explicitly disabled
-        if not settings["no_probe"]:
-            process_ffprobe(settings, conn)
-        else:
-            logging.info("Quality probing with ffprobe disabled.")
+        process_ffprobe(settings, conn)
     else:
         logging.warning(
             f"Portal '{settings['portal_name']}' configured for offline processing"
